@@ -14,12 +14,8 @@ app.use(
 
 app.use(express.static("public"));
 app.use(cookieParser());
-
-// ✅ Register routes that use multer BEFORE body parsers
-app.use("/api/v1/users", userRoutes);
-
-// ✅ Then add the JSON and URL-encoded parsers
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use("/api/v1/users", userRoutes);
 
 export { app };
