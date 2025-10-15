@@ -204,7 +204,7 @@ const resetAccessTokens = asyncHandler(async (req, res) => {
     };
 
     const { accessToken, newRefreshToken } =
-      await generateAccessAndRefereshTokens(user._id);
+      await generateTokens(user._id);
 
     return res
       .status(200)
