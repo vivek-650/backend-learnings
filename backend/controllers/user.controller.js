@@ -98,44 +98,69 @@ const registerUser = asyncHandler(async (req, res) => {
 });
 
 const loginUser = asyncHandler(async (req, res) => {
+  // Validate request body exists
   if (!req.body) {
+    throw new ApiError(400, "Missing form fields. Please provide credentials");
+  }
+
+  // Get login credentials from frontend (identifier can be email or username)
+  const { identifier, password } = req.body;
+
+  // Validation: check if both fields are provided
+  if (!identifier || !identifier.trim()) {
+    throw new ApiError(400, "Email or username is required");
+  }
+
+  if (!password) {
+    throw new ApiError(400, "Password is required");
+  }
+
+  // Determine if identifier is email or username
+  const isEmail = identifier.includes("@");
+
+  // Find user in database by email or username
+  const user = await User.findOne(
+    isEmail
+      ? { email: identifier.trim() }
+      : { username: identifier.trim().toLowerCase() }
+  );
+
+  // Check if user exists
+  if (!user) {
     throw new ApiError(
-      400,
-      "Missing form fields. Make sure you submit the credentials "
+      404,
+      "User not found. Please check your email or username"
     );
   }
-  //login data from frontend
-  const { username, email, password } = req.body;
-  if (!username || !email) {
-    throw new ApiError(400, "Username or email is required");
-  }
-  //find username in db
-  const user = await User.findOne({ $or: [{ username }, { email }] });
-  if (!user) {
-    throw new ApiError(404, "username or email not found");
-  }
-  // check for the password
-  const isPasswordValid = await user?.isPasswordCorrect(password);
+
+  // Verify password
+  const isPasswordValid = await user.isPasswordCorrect(password);
+
   if (!isPasswordValid) {
-    throw new ApiError(401, "Invalid password");
+    throw new ApiError(401, "Invalid password. Please try again");
   }
-  //generate access token and refresh token
+
+  // Generate access token and refresh token
   const { accessToken, refreshToken } = await generateTokens(user._id);
 
+  // Prepare user object without sensitive data
   const loggedInUser = { ...user._doc };
   delete loggedInUser.password;
   delete loggedInUser.refreshToken;
-  const option = {
+
+  // Cookie options for security
+  const options = {
     httpOnly: true,
-    secure: true,
-    sameSite: "Strict",
+    secure: process.env.NODE_ENV === "production", // Use secure in production
+    sameSite: "strict",
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   };
 
+  // Send response with cookies and user data
   res
     .status(200)
-    .cookie("refreshToken", refreshToken, option)
-    .cookie("accessToken", accessToken, option)
+    .cookie("refreshToken", refreshToken, options)
+    .cookie("accessToken", accessToken, options)
     .json(
       new ApiResponse(
         200,
@@ -315,5 +340,5 @@ export {
   getCurrentuser,
   updateUserProfile,
   updateUserCoverImage,
-  updateUserAvatar
+  updateUserAvatar,
 };
