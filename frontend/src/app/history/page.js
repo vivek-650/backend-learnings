@@ -3,67 +3,95 @@
 import { useState, useEffect } from "react";
 import YouTubeLayout from "@/components/layout/YouTubeLayout";
 import VideoCard from "@/components/video/VideoCard";
-import { getAllVideos } from "@/lib/api/youtube";
+import { getWatchHistory } from "@/lib/api/youtube";
+import { useAuth } from "@/context/AuthContext";
 
-export default function Home() {
+export default function HistoryPage() {
+  const { user } = useAuth();
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetchVideos();
-  }, []);
+    if (user) {
+      fetchHistory();
+    } else {
+      setLoading(false);
+    }
+  }, [user]);
 
-  const fetchVideos = async () => {
+  const fetchHistory = async () => {
     try {
       setLoading(true);
       setError(null);
-      // TODO: Implement video routes in backend
-      // For now, we'll show empty state since /videos endpoint doesn't exist yet
-      // const data = await getAllVideos({ limit: 24 });
-      // setVideos(data.videos || []);
-      setVideos([]);
+      const data = await getWatchHistory();
+      setVideos(data.watchHistory || []);
     } catch (err) {
       setError(err.message);
-      console.error("Failed to fetch videos:", err);
+      console.error("Failed to fetch history:", err);
     } finally {
       setLoading(false);
     }
   };
 
+  if (!user) {
+    return (
+      <YouTubeLayout>
+        <div className="max-w-4xl mx-auto px-6 py-12 text-center">
+          <svg
+            className="w-24 h-24 mx-auto text-gray-300 mb-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          <h2 className="text-2xl font-bold text-gray-700 mb-2">
+            Keep track of what you watch
+          </h2>
+          <p className="text-gray-500 mb-6">
+            Watch history not viewable when signed out
+          </p>
+          <a
+            href="/login"
+            className="inline-block px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700"
+          >
+            Sign In
+          </a>
+        </div>
+      </YouTubeLayout>
+    );
+  }
+
   return (
     <YouTubeLayout>
-      <div className="p-6">
-        {/* Filter chips */}
-        <div className="mb-6 flex gap-3 overflow-x-auto pb-2">
-          {[
-            "All",
-            "Music",
-            "Gaming",
-            "Live",
-            "News",
-            "Sports",
-            "Learning",
-            "Fashion",
-            "Podcasts",
-          ].map((filter) => (
+      <div className="max-w-7xl mx-auto px-6 py-6">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold">Watch History</h1>
+          {videos.length > 0 && (
             <button
-              key={filter}
-              className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${
-                filter === "All"
-                  ? "bg-gray-900 text-white"
-                  : "bg-gray-100 hover:bg-gray-200 text-gray-900"
-              }`}
+              onClick={() => {
+                if (confirm("Clear all watch history?")) {
+                  // TODO: Implement clear history API
+                  setVideos([]);
+                }
+              }}
+              className="text-blue-600 hover:text-blue-700 font-medium"
             >
-              {filter}
+              Clear all watch history
             </button>
-          ))}
+          )}
         </div>
 
         {/* Loading state */}
         {loading && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {[...Array(12)].map((_, i) => (
+            {[...Array(8)].map((_, i) => (
               <div key={i} className="animate-pulse">
                 <div className="aspect-video bg-gray-200 rounded-xl mb-3"></div>
                 <div className="flex gap-3">
@@ -95,10 +123,10 @@ export default function Home() {
                   d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
-              <span>Failed to load videos: {error}</span>
+              <span>Failed to load history: {error}</span>
             </div>
             <button
-              onClick={fetchVideos}
+              onClick={fetchHistory}
               className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
               Try Again
@@ -127,14 +155,14 @@ export default function Home() {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
                 <h3 className="text-xl font-semibold text-gray-700 mb-2">
-                  No videos yet
+                  No watch history
                 </h3>
                 <p className="text-gray-500">
-                  Check back later for new content
+                  Videos you watch will show up here
                 </p>
               </div>
             )}
