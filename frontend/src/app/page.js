@@ -18,11 +18,12 @@ export default function Home() {
     try {
       setLoading(true);
       setError(null);
-      // TODO: Implement video routes in backend
-      // For now, we'll show empty state since /videos endpoint doesn't exist yet
-      // const data = await getAllVideos({ limit: 24 });
-      // setVideos(data.videos || []);
-      setVideos([]);
+      const data = await getAllVideos({
+        limit: 24,
+        sortBy: "createdAt",
+        sortType: "desc",
+      });
+      setVideos(data.data?.videos || []);
     } catch (err) {
       setError(err.message);
       console.error("Failed to fetch videos:", err);

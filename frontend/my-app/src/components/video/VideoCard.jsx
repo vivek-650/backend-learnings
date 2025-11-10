@@ -19,7 +19,7 @@ export default function VideoCard({ video }) {
 
   return (
     <div className="group cursor-pointer">
-      <Link href={`/watch?v=${_id}`}>
+      <Link href={`/watch/${_id}`}>
         {/* Thumbnail */}
         <div className="relative aspect-video bg-gray-200 rounded-xl overflow-hidden mb-3">
           {thumbnail ? (
@@ -71,7 +71,7 @@ export default function VideoCard({ video }) {
 
         {/* Title and channel info */}
         <div className="flex-1 min-w-0">
-          <Link href={`/watch?v=${_id}`}>
+          <Link href={`/watch/${_id}`}>
             <h3 className="font-semibold text-sm line-clamp-2 leading-tight mb-1 group-hover:text-gray-700">
               {title}
             </h3>

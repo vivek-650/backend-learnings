@@ -5,7 +5,11 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import YouTubeLayout from "@/components/layout/YouTubeLayout";
 import { useAuth } from "@/context/AuthContext";
-import { getAllVideos, deleteVideo, updateVideo } from "@/lib/api/youtube";
+import {
+  getChannelVideos,
+  deleteVideo,
+  togglePublishStatus,
+} from "@/lib/api/youtube";
 import { formatViews, formatTimeAgo, formatDuration } from "@/lib/utils";
 
 export default function StudioPage() {
@@ -28,11 +32,8 @@ export default function StudioPage() {
     try {
       setLoading(true);
       setError(null);
-      // TODO: Implement video routes in backend
-      // For now, show empty state since /videos endpoint doesn't exist yet
-      // const data = await getAllVideos({ uploadedBy: user._id });
-      // setVideos(data.videos || []);
-      setVideos([]);
+      const data = await getChannelVideos();
+      setVideos(data.data || []);
     } catch (err) {
       setError(err.message);
       console.error("Failed to fetch videos:", err);
@@ -63,7 +64,7 @@ export default function StudioPage() {
 
   const handleTogglePublish = async (video) => {
     try {
-      await updateVideo(video._id, { isPublished: !video.isPublished });
+      await togglePublishStatus(video._id);
       setVideos(
         videos.map((v) =>
           v._id === video._id ? { ...v, isPublished: !v.isPublished } : v

@@ -252,31 +252,264 @@ export async function deleteVideo(videoId) {
   });
 }
 
+/**
+ * Toggle video publish status
+ */
+export async function togglePublishStatus(videoId) {
+  return apiRequest(`/videos/toggle/publish/${videoId}`, {
+    method: "PATCH",
+  });
+}
+
+// ==================== COMMENT OPERATIONS ====================
+
+/**
+ * Get comments for a video
+ */
+export async function getVideoComments(videoId, { page = 1, limit = 10 } = {}) {
+  const params = new URLSearchParams({ page, limit });
+  return apiRequest(`/comments/${videoId}?${params}`, {
+    method: "GET",
+  });
+}
+
+/**
+ * Add a comment to a video
+ */
+export async function addComment(videoId, content) {
+  return apiRequest(`/comments/${videoId}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ content }),
+  });
+}
+
+/**
+ * Update a comment
+ */
+export async function updateComment(commentId, content) {
+  return apiRequest(`/comments/c/${commentId}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ content }),
+  });
+}
+
+/**
+ * Delete a comment
+ */
+export async function deleteComment(commentId) {
+  return apiRequest(`/comments/c/${commentId}`, {
+    method: "DELETE",
+  });
+}
+
+// ==================== LIKE OPERATIONS ====================
+
+/**
+ * Toggle like on a video
+ */
+export async function toggleVideoLike(videoId) {
+  return apiRequest(`/likes/toggle/v/${videoId}`, {
+    method: "POST",
+  });
+}
+
+/**
+ * Toggle like on a comment
+ */
+export async function toggleCommentLike(commentId) {
+  return apiRequest(`/likes/toggle/c/${commentId}`, {
+    method: "POST",
+  });
+}
+
+/**
+ * Toggle like on a tweet
+ */
+export async function toggleTweetLike(tweetId) {
+  return apiRequest(`/likes/toggle/t/${tweetId}`, {
+    method: "POST",
+  });
+}
+
+/**
+ * Get all liked videos
+ */
+export async function getLikedVideos() {
+  return apiRequest("/likes/videos", {
+    method: "GET",
+  });
+}
+
+// ==================== PLAYLIST OPERATIONS ====================
+
+/**
+ * Create a new playlist
+ */
+export async function createPlaylist(name, description = "") {
+  return apiRequest("/playlists", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ name, description }),
+  });
+}
+
+/**
+ * Get user playlists
+ */
+export async function getUserPlaylists(userId) {
+  return apiRequest(`/playlists/user/${userId}`, {
+    method: "GET",
+  });
+}
+
+/**
+ * Get playlist by ID
+ */
+export async function getPlaylistById(playlistId) {
+  return apiRequest(`/playlists/${playlistId}`, {
+    method: "GET",
+  });
+}
+
+/**
+ * Update playlist
+ */
+export async function updatePlaylist(playlistId, updates) {
+  return apiRequest(`/playlists/${playlistId}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(updates),
+  });
+}
+
+/**
+ * Delete playlist
+ */
+export async function deletePlaylist(playlistId) {
+  return apiRequest(`/playlists/${playlistId}`, {
+    method: "DELETE",
+  });
+}
+
+/**
+ * Add video to playlist
+ */
+export async function addVideoToPlaylist(playlistId, videoId) {
+  return apiRequest(`/playlists/add/${videoId}/${playlistId}`, {
+    method: "PATCH",
+  });
+}
+
+/**
+ * Remove video from playlist
+ */
+export async function removeVideoFromPlaylist(playlistId, videoId) {
+  return apiRequest(`/playlists/remove/${videoId}/${playlistId}`, {
+    method: "PATCH",
+  });
+}
+
+// ==================== TWEET OPERATIONS ====================
+
+/**
+ * Create a tweet
+ */
+export async function createTweet(content) {
+  return apiRequest("/tweets", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ content }),
+  });
+}
+
+/**
+ * Get user tweets
+ */
+export async function getUserTweets(userId) {
+  return apiRequest(`/tweets/user/${userId}`, {
+    method: "GET",
+  });
+}
+
+/**
+ * Update a tweet
+ */
+export async function updateTweet(tweetId, content) {
+  return apiRequest(`/tweets/${tweetId}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ content }),
+  });
+}
+
+/**
+ * Delete a tweet
+ */
+export async function deleteTweet(tweetId) {
+  return apiRequest(`/tweets/${tweetId}`, {
+    method: "DELETE",
+  });
+}
+
+// ==================== DASHBOARD OPERATIONS ====================
+
+/**
+ * Get channel statistics
+ */
+export async function getChannelStats() {
+  return apiRequest("/dashboard/stats", {
+    method: "GET",
+  });
+}
+
+/**
+ * Get all channel videos
+ */
+export async function getChannelVideos() {
+  return apiRequest("/dashboard/videos", {
+    method: "GET",
+  });
+}
+
 // ==================== SUBSCRIPTION OPERATIONS ====================
 
 /**
- * Subscribe to a channel
+ * Toggle subscription to a channel
  */
-export async function subscribeToChannel(channelId) {
+export async function toggleSubscription(channelId) {
   return apiRequest(`/subscriptions/c/${channelId}`, {
     method: "POST",
   });
 }
 
 /**
- * Unsubscribe from a channel
+ * Get channel subscribers
  */
-export async function unsubscribeFromChannel(channelId) {
+export async function getChannelSubscribers(channelId) {
   return apiRequest(`/subscriptions/c/${channelId}`, {
-    method: "DELETE",
+    method: "GET",
   });
 }
 
 /**
- * Get user subscriptions
+ * Get subscribed channels
  */
-export async function getUserSubscriptions() {
-  return apiRequest("/subscriptions", {
+export async function getSubscribedChannels(subscriberId) {
+  return apiRequest(`/subscriptions/u/${subscriberId}`, {
     method: "GET",
   });
 }
